@@ -1,0 +1,193 @@
+<?php
+session_start();
+
+// Clear all sessions to prevent conflicts
+session_unset();
+
+// Prevent caching
+header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+header("Cache-Control: post-check=0, pre-check=0", false);
+header("Pragma: no-cache");
+
+// Hardcoded Super Admin credentials
+define('SUPERADMIN_USERNAME', 'superadmin');
+define('SUPERADMIN_PASSWORD_HASH', password_hash('SuperSecret@123', PASSWORD_DEFAULT));
+
+// Process login
+$error = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $username = trim($_POST['username']);
+    $password = trim($_POST['password']);
+    
+    if ($username === SUPERADMIN_USERNAME && password_verify($password, SUPERADMIN_PASSWORD_HASH)) {
+        $_SESSION['superadmin_logged_in'] = true;
+        header("Location: superadmin_dashboard.php");
+        exit();
+    } else {
+        $error = "Invalid credentials";
+    }
+}
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Super Admin Login</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        :root {
+            --primary: #3D8D7A;
+            --secondary: #B3D8A8;
+            --accent: #FBFFE4;
+            --teal: #A3D1C6;
+            --dark: #2a6d5e;
+            --gold: #FFD700;
+        }
+        body {
+            background: linear-gradient(135deg, var(--primary), var(--teal), var(--accent));
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .login-container {
+            background: rgba(251, 255, 228, 0.92);
+            backdrop-filter: blur(10px);
+            border-radius: 22px;
+            padding: 40px 35px;
+            max-width: 450px;
+            width: 100%;
+            box-shadow: 0 12px 30px rgba(61, 141, 122, 0.25);
+            border: 1px solid rgba(163, 209, 198, 0.5);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .login-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(61, 141, 122, 0.3);
+        }
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .login-header h2 {
+            color: var(--primary);
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 32px;
+            letter-spacing: 0.5px;
+        }
+        .superadmin-icon {
+            color: var(--gold);
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+        .form-group {
+            margin-bottom: 25px;
+        }
+        .form-label {
+            color: var(--dark);
+            font-weight: 600;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        .form-control {
+            background: rgba(255, 255, 255, 0.8);
+            border: 2px solid var(--teal);
+            border-radius: 12px;
+            padding: 14px 20px;
+            color: var(--dark);
+            font-size: 16px;
+            transition: all 0.3s;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .form-control:focus {
+            background: rgba(255, 255, 255, 0.95);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(61, 141, 122, 0.2);
+            outline: none;
+        }
+        .btn-superadmin {
+            background: linear-gradient(45deg, var(--gold), #FFA500);
+            color: #2f4f4f;
+            border: none;
+            border-radius: 12px;
+            padding: 14px;
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: all 0.3s;
+            box-shadow: 0 6px 15px rgba(255, 215, 0, 0.3);
+            width: 100%;
+        }
+        .btn-superadmin:hover {
+            background: linear-gradient(45deg, #FFA500, var(--gold));
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(255, 215, 0, 0.4);
+        }
+        .btn-back {
+            display: block;
+            text-align: center;
+            color: var(--primary);
+            font-weight: 600;
+            margin-top: 20px;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        .btn-back:hover {
+            color: var(--dark);
+            text-decoration: underline;
+        }
+        .alert {
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 25px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <div class="superadmin-icon">
+                <i class="fas fa-crown"></i>
+            </div>
+            <h2>Super Admin Login</h2>
+        </div>
+        
+        <?php if (!empty($error)): ?>
+            <div class="alert alert-danger"><?= $error ?></div>
+        <?php endif; ?>
+        
+        <form method="POST">
+            <div class="form-group">
+                <label class="form-label">Username</label>
+                <input type="text" class="form-control" name="username" required autocomplete="off">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Password</label>
+                <input type="password" class="form-control" name="password" required autocomplete="off">
+            </div>
+            
+            <button type="submit" class="btn btn-superadmin">Login</button>
+            
+            <a href="index3.php" class="btn-back">← Back to Main Login</a>
+        </form>
+    </div>
+    
+    <script>
+    // Block back navigation
+    history.pushState(null, null, location.href);
+    window.onpopstate = function() { history.go(1); };
+    
+    // Force reload if page restored from cache
+    window.addEventListener('pageshow', function(event) {
+        if (event.persisted || performance.navigation.type === 2) {
+            window.location.reload();
+        }
+    });
+    </script>
+</body>
+</html>

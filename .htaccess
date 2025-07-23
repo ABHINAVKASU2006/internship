@@ -1,0 +1,90 @@
+# Security Headers
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options nosniff
+    Header always set X-Frame-Options DENY
+    Header always set X-XSS-Protection "1; mode=block"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+</IfModule>
+
+
+# Protect configuration files
+
+# Block suspicious user agents
+RewriteEngine On
+RewriteCond %{HTTP_USER_AGENT} (libwww-perl|wget|python|nikto|acunetix|havij|sqlmap|nmap|curl|scan|crawler|bot) [NC]
+RewriteRule .* - [F,L]
+
+# Block suspicious query parameters
+RewriteCond %{QUERY_STRING} (union|select|insert|update|delete|drop|script|javascript|vbscript|onload|onerror) [NC]
+RewriteRule .* - [F,L]
+
+# Block access to hidden files
+RewriteCond %{SCRIPT_FILENAME} -d [OR]
+RewriteCond %{SCRIPT_FILENAME} -f
+RewriteRule "(^\.|/\.)" - [F]
+
+# Force HTTPS (uncomment if you have SSL)
+# RewriteCond %{HTTPS} off
+# RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Prevent directory browsing
+Options -Indexes
+
+# Set default character set
+AddDefaultCharset UTF-8
+
+# Compress files
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/plain
+    AddOutputFilterByType DEFLATE text/html
+    AddOutputFilterByType DEFLATE text/xml
+    AddOutputFilterByType DEFLATE text/css
+    AddOutputFilterByType DEFLATE application/xml
+    AddOutputFilterByType DEFLATE application/xhtml+xml
+    AddOutputFilterByType DEFLATE application/rss+xml
+    AddOutputFilterByType DEFLATE application/javascript
+    AddOutputFilterByType DEFLATE application/x-javascript
+</IfModule>
+
+# Cache control
+<IfModule mod_expires.c>
+    ExpiresActive on
+    ExpiresByType text/css "access plus 1 year"
+    ExpiresByType application/javascript "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/jpg "access plus 1 year"
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType image/ico "access plus 1 year"
+    ExpiresByType image/icon "access plus 1 year"
+    ExpiresByType text/plain "access plus 1 month"
+    ExpiresByType application/pdf "access plus 1 month"
+    ExpiresByType application/x-shockwave-flash "access plus 1 month"
+    ExpiresByType text/html "access plus 1 hour"
+</IfModule>
+
+# Custom error pages
+ErrorDocument 403 /index3.php
+ErrorDocument 404 /index3.php
+ErrorDocument 500 /index3.php
+
+# PHP settings
+<IfModule mod_php7.c>
+    php_flag display_errors off
+    php_flag log_errors on
+    php_value error_log /path/to/error.log
+    php_flag allow_url_fopen off
+    php_flag allow_url_include off
+    php_flag file_uploads on
+    php_value upload_max_filesize 10M
+    php_value post_max_size 10M
+    php_value max_execution_time 30
+    php_value memory_limit 128M
+    php_flag session.cookie_httponly on
+    php_flag session.cookie_secure off
+    php_flag session.use_only_cookies on
+    php_value session.cookie_lifetime 0
+    php_value session.gc_maxlifetime 1800
+</IfModule> 
